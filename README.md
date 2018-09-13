@@ -8,4 +8,4 @@ npm run start
 npm run build
 ```
 
-**Note**: the compiled/bundled static files are inside the `dist` folder!
+**Note**: the compiled/bundled static files are inside the `dist` folder! You need to run ```npm run build``` before you can serve what's inside `dist`.
