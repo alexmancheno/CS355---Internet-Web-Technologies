@@ -1,10 +1,13 @@
 import React from 'react';
 
-const Home = () => (
-    <div>
-        <h1>CS 355 Home Page</h1>
-        <p>This is my homepage for CS 355</p>
-    </div>
-)
+export default class Home extends React.Component {
 
-export default Home;
+    render() {
+        return (
+            <div>
+                <h1>CS 355 Home Page</h1>
+                <p>This is my home page for CS 355</p>
+            </div>
+        )
+    }
+}
