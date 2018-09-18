@@ -32,6 +32,11 @@ export default class Header extends React.Component {
                                     <ul class="dropdown-menu">
                                         <li><a href="https://www.zybooks.com/" target="_blanks">Zybooks</a></li>
                                         <li><Link to="/">Assignment 1</Link></li>
+                                        <li>
+                                            <Link to="/Assignment2">
+                                                Assignment 2
+                                            </Link>
+                                        </li>
                                     </ul>
                                 </li>
                                 <li><Link to="/UserInfo">User Info</Link>

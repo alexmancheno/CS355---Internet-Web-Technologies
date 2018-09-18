@@ -27,6 +27,7 @@
     "auto-bind": "^1.2.1",
     "react": "^16.5.0",
     "react-dom": "^16.5.0",
+    "react-file-reader": "^1.1.4",
     "react-router-dom": "^4.3.1"
   }
 }
