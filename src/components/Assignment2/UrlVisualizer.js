@@ -35,9 +35,9 @@ export default class UrlVisualizer extends React.Component {
 
         return (
             <div>
-                <h3>Current time: {new Date().toLocaleTimeString()}</h3>
-                <h4>Urls length: {this.props.urls.length}</h4>
+                <h4>Displaying information for {this.props.urls.length} Url's</h4>
                 <UrlTable url_objects={url_objects}/>
+                <br />
                 <UrlGraphs url_objects={url_objects} />
             </div>
         )

@@ -36,7 +36,8 @@ export default class UrlTable extends React.Component {
 
         return (
             <div>
-                <table class="table">
+                <h3>Url components</h3>
+                <table class="table" >
                     <thead>
                         <tr>
                             <th scope="col">#</th>
