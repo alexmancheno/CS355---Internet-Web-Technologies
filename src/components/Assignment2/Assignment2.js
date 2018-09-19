@@ -24,7 +24,7 @@ export default class Assignment2 extends React.Component {
 
     render() {
         let url_array = this.state.urls;
-        let msg = "hi";
+        
         return (
             <div>
                  <input type='file' accept='text/plain'
