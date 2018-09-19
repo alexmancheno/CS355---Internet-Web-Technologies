@@ -18,14 +18,12 @@ export default class Assignment2 extends React.Component {
             let str = reader.result;
             let arr = str.split(/[\r\n]+/g);
             this.setState({urls: arr});
-            console.log(this.state.urls);
         };
         reader.readAsText(input.files[0]);
     }
 
     render() {
         let url_array = this.state.urls;
-        console.log("url_array: " + url_array);
         let msg = "hi";
         return (
             <div>
