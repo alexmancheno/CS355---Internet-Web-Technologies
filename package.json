@@ -24,13 +24,12 @@
     "webpack-dev-server": "^3.1.8"
   },
   "dependencies": {
-    "auto-bind": "^1.2.1",
     "chart.js": "^2.7.2",
     "react": "^16.5.0",
+    "react-autobind": "^1.0.6",
     "react-chartjs-2": "^2.7.4",
     "react-dom": "^16.5.0",
     "react-file-reader": "^1.1.4",
-    "react-router-dom": "^4.3.1",
-    "url": "^0.11.0"
+    "react-router-dom": "^4.3.1"
   }
 }

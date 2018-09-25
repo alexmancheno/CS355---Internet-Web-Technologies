@@ -1,5 +1,5 @@
 import React from 'react';
-const autoBind = require('auto-bind');
+import autoBind from 'react-autobind';
 
 export default class UserInfo extends React.Component {
     constructor(props) {
@@ -8,19 +8,19 @@ export default class UserInfo extends React.Component {
     }
 
     navigatorInfo() {
-       console.log(navigator);
-       return (
-           <div>
-              <h4><b>Navigator information</b></h4>
-              <p>appCodeName: {navigator.appCodeName}</p>
-              <p>appName: {navigator.appName}</p>
-              <p>appVersion: {navigator.appVersion}</p>
-              <p>cookieEnabled: {navigator.cookieEnabled.toString()}</p>
-              <p>language: {navigator.language}</p>
-              <p>onLine: {navigator.onLine.toString()}</p>
-              <p></p>
-           </div>
-       ); 
+        console.log(navigator);
+        return (
+            <div>
+                <h4><b>Navigator information</b></h4>
+                <p>appCodeName: {navigator.appCodeName}</p>
+                <p>appName: {navigator.appName}</p>
+                <p>appVersion: {navigator.appVersion}</p>
+                <p>cookieEnabled: {navigator.cookieEnabled.toString()}</p>
+                <p>language: {navigator.language}</p>
+                <p>onLine: {navigator.onLine.toString()}</p>
+                <p></p>
+            </div>
+        );
     }
 
     screenInfo() {
@@ -35,7 +35,7 @@ export default class UserInfo extends React.Component {
                 <p>pixelDepth: {screen.pixelDepth}</p>
                 <p>width: {screen.width}</p>
             </div>
-        ); 
+        );
     }
 
     windowInfo() {
@@ -50,16 +50,16 @@ export default class UserInfo extends React.Component {
                 <p>outerHeight: {window.outerHeight}</p>
                 <p>outerWidth: {window.outerWidth}</p>
             </div>
-        ); 
+        );
     }
 
     render() {
         return (
             <div>
                 {this.navigatorInfo()}
-                <br/>
+                <br />
                 {this.screenInfo()}
-                <br/>
+                <br />
                 {this.windowInfo()}
             </div>
         )

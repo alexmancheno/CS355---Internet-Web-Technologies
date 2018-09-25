@@ -1,6 +1,6 @@
 import React from 'react';
-import {Pie, Bar} from 'react-chartjs-2';
-const autoBind = require('auto-bind');
+import { Bar } from 'react-chartjs-2';
+import autoBind from 'react-autobind';
 
 export default class UrlGraphs extends React.Component {
     constructor(props) {
@@ -94,7 +94,7 @@ export default class UrlGraphs extends React.Component {
             <div>
                 <h3>Scheme data</h3>
                 <Bar data={scheme_data} options={options} />
-                <br/>
+                <br />
                 <h3>Top-level domains</h3>
                 <Bar data={tld_data} options={options} />
             </div>

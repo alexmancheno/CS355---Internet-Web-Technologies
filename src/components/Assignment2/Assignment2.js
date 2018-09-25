@@ -1,6 +1,6 @@
 import React from 'react';
 import UrlVisualizer from './UrlVisualizer';
-const autoBind = require('auto-bind');
+import autoBind from 'react-autobind';
 
 export default class Assignment2 extends React.Component {
     constructor(props) {
@@ -17,7 +17,7 @@ export default class Assignment2 extends React.Component {
         reader.onload = () => {
             let str = reader.result;
             let arr = str.split(/[\r\n]+/g);
-            this.setState({urls: arr});
+            this.setState({ urls: arr });
         };
         reader.readAsText(input.files[0]);
     }
@@ -25,12 +25,15 @@ export default class Assignment2 extends React.Component {
     render() {
 
         let url_array = this.state.urls;
-        
+
         return (
-            <div> 
-                 <input type='file' accept='text/plain'
-                  onChange={e => this.openFile(e)} />
-                  <UrlVisualizer urls={url_array} />
+            <div>
+                <h2>Assignment 2 - Url Analyzer</h2>
+                <h3>Upload file containing url's</h3>
+                <input type='file' accept='text/plain'
+                    onChange={e => this.openFile(e)} />
+                <br />
+                <UrlVisualizer urls={url_array} />
             </div>
         )
     }

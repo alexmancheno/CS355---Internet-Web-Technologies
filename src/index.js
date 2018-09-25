@@ -5,6 +5,6 @@ import App from './components/App';
 
 render((
     <HashRouter>
-        <App/>
+        <App />
     </HashRouter>
 ), document.getElementById('root'));

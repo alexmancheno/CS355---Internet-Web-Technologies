@@ -8,7 +8,7 @@ import Assignment2 from './Assignment2/Assignment2';
 // Routes (provided that one matches).
 
 export default class Main extends React.Component {
-    render () {
+    render() {
         return (
             <main class="container">
                 <Switch>

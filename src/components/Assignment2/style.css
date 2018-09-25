@@ -1,17 +1,16 @@
 .urlTable {
-    border-collapse: collapse;
-    table-layout: fixed;
-    width: 100%;
-    max-width: 100%;
+    border-collapse:collapse; 
+    table-layout:fixed; 
+    width:100%;
+    border:solid 1px #fab; 
 }
-
 .urlTable td {
-    border: solid 1px #fab;
-    width: 100px;
-    word-wrap: break-word;
+    border:solid 1px #fab; 
+    width:100%; 
+    word-wrap:break-word;
 }
 .urlTable th {
-    border: solid 1px #fab;
-    width: 100px;
-    word-wrap: break-word;
+    border:solid 1px #fab; 
+    width:100%; 
+    word-wrap:break-word;
 }

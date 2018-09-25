@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 
 export default class Header extends React.Component {
 
-    render () {
+    render() {
         return (
             <header>
                 <nav class="navbar navbar-default navbar-inverse">
