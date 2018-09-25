@@ -23,10 +23,11 @@ export default class Assignment2 extends React.Component {
     }
 
     render() {
+
         let url_array = this.state.urls;
         
         return (
-            <div>
+            <div> 
                  <input type='file' accept='text/plain'
                   onChange={e => this.openFile(e)} />
                   <UrlVisualizer urls={url_array} />

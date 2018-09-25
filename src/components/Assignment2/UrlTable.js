@@ -1,4 +1,5 @@
 import React from 'react';
+import style from './style.css';
 const autoBind = require('auto-bind');
 
 export default class UrlTable extends React.Component {
@@ -13,7 +14,7 @@ export default class UrlTable extends React.Component {
 
         let rows = arr.map((url, index)=> 
             <tr>
-                <th>{index}</th>
+                <td>{index}</td>
                 <td>{url.href}</td>
                 <td>{url.protocol}</td>
                 <td>{url.host}</td>
@@ -33,11 +34,10 @@ export default class UrlTable extends React.Component {
 
     render() {
         let tbody = this.constructTable();
-
         return (
             <div>
                 <h3>Url components</h3>
-                <table class="table" >
+                <table className={"table table-striped "}>
                     <thead>
                         <tr>
                             <th scope="col">#</th>
