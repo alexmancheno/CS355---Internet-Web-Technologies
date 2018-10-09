@@ -17,7 +17,8 @@ export default class UrlVisualizer extends React.Component {
             let q = new URL(arr[i]);
             let xhr = new XMLHttpRequest();
             let ipaddress;
-            xhr.open("GET", `https://dns.google.com/resolve?name=${q.hostname}`, false);
+            let domain = q.hostname.split("www.").pop();
+            xhr.open("GET", `https://dns.google.com/resolve?name=${domain}`, false);
             xhr.onload = function () {
                 let res = JSON.parse(this.responseText);
                 ipaddress = ((res.Answer)[0]).data;
