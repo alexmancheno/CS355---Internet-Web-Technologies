@@ -5,24 +5,73 @@ export default class UserInput extends React.Component {
     constructor(props) {
         super(props);
         autoBind(this);
+        let addresses = new Object();
         this.state = {
             classful: true,
-            classValue: "A"
+            classNameValue: "A",
+            addresses: JSON.stringify(addresses)
         }
     }
 
-    handleClassChange(event) {
-        this.setState({classValue: event.target.value})
-        console.log("classValue: " + this.state.classValue);
+    handleclassNameChange(event) {
+        this.setState({classNameValue: event.target.value})
     }
 
-    handleClassRadioButtonChange(classful) {
-        this.setState({classful: classful});
+    handleclassNameRadioButtonChange(bool) {
+        this.setState({classNameful: bool});
     }
 
     handleSubmit(event) { 
         event.preventDefault();
+        this.generateIPv4Address();
+    }
 
+    getRandomInt(max) {
+        return Math.floor(Math.random() * Math.floor(max));
+    }
+
+    dec2bin(dec) {
+        return (dec >>> 0).toString(2);
+    }   
+
+    generateIPv4Address() {
+        console.log(this.state.addresses);
+        let map;
+        if (localStorage.getItem("addresses") !== null) {
+            map = JSON.parse(localStorage.getItem("addresses"));
+        } else {
+            map = new Object();
+        }
+        let randomAddress;
+        let r = 0;
+        if (this.state.classful) {
+            if (this.state.classNameValue === "A") {
+                r += (this.getRandomInt(128)) << 24;
+            } else if (this.state.classNameValue === "B") {
+                r += (this.getRandomInt(64) + 128) << 24;
+                r += (this.getRandomInt(256) << 16);
+            } else if (this.state.classNameValue === "C") {
+                r += (this.getRandomInt(32) + 192) << 24;
+                r += (this.getRandomInt(256)) << 16;
+                r += (this.getRandomInt(256)) << 8;
+            } else if (this.state.classNameValue === "D")  {
+                r += (this.getRandomInt(16) + 224) << 24;
+                r += (this.getRandomInt(256)) << 16;
+                r += (this.getRandomInt(256)) << 8;
+                r += (this.getRandomInt(256));
+            } else if (this.state.classNameValue === "E") {
+                console.log("Error! There's no class E!");
+            }
+        }
+        console.log("1");
+        randomAddress = r.toString();
+        console.log(map);
+        if (!(randomAddress in map)) map[randomAddress] = "yes";
+        else console.log("Address already existed!");
+        console.log("2");
+        localStorage.setItem("addresses", JSON.stringify(map));
+        console.log(r.toString(2));
+        // localStorage.clear();
     }
 
     getIPv4TabContent() {
@@ -30,27 +79,18 @@ export default class UserInput extends React.Component {
             <div>
                 <form onSubmit={e => this.handleSubmit(e)}>
                     <div className="form-group-row">
-                        <legend class="col-form-label col-sm-2 pt-0">Classful or classless?</legend>
+                        <legend className="col-form-label">classNameful or classNameless?</legend>
                         <div className="radio">
                             <label>
                                 <input type="radio"
-                                    checked={this.state.classful === true}
-                                    onChange={e => this.handleClassRadioButtonChange(true)} />
-                                Classful
+                                    checked={this.state.classNameful === true}
+                                    onChange={e => this.handleclassNameRadioButtonChange(true)} />
+                                classful
                             </label>
                         </div>
-                        <div className="radio">
-                            <label>
-                                <input type="radio"
-                                    checked={this.state.classful === false}
-                                    onChange={e => this.handleClassRadioButtonChange(false)}/>
-                                Classless
-                            </label>
-                        </div>
-                    </div>
                     <div className="form-group">
-                        <label htmlFor="classSelect">Pick addressing class</label>
-                        <select className="form-control" id="classSelect" value={this.state.classValue} onChange={e => this.handleClassChange(e)} >
+                        <label htmlFor="classNameSelect">Pick addressing className</label>
+                        <select className="form-control" id="classNameSelect" value={this.state.classNameValue} onChange={e => this.handleclassNameChange(e)}  disabled={!this.state.classNameful}>
                             <option>A</option>
                             <option>B</option>
                             <option>C</option>
@@ -58,7 +98,21 @@ export default class UserInput extends React.Component {
                             <option>E</option>
                         </select>
                     </div>
+                        <div className="radio">
+                            <label>
+                                <input type="radio"
+                                    checked={this.state.classNameful === false}
+                                    onChange={e => this.handleclassNameRadioButtonChange(false)} />
+                                classless
+                            </label>
+                        </div>
+                    <div className="input-group">
+                        <span className="input-group-addon" id="basic-addon1">Number of hosts needed:</span>
+                        <input type="number" className="form-control" placeholder="hosts.." aria-describedby="basic-addon1" disabled={this.state.classNameful}/>
+                    </div>
+                    <br/>
                     <button type="submit" value="submit" className="btn btn-primary">Assign!</button>
+                    </div>
                 </form>
             </div>
         )
