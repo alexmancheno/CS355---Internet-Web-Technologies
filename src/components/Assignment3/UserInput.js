@@ -9,6 +9,7 @@ export default class UserInput extends React.Component {
         this.state = {
             classful: true,
             classNameValue: "A",
+            numberOfHostsNeeded: 0,
             addresses: JSON.stringify(addresses)
         }
     }
@@ -60,18 +61,25 @@ export default class UserInput extends React.Component {
                 r += (this.getRandomInt(256)) << 8;
                 r += (this.getRandomInt(256));
             } else if (this.state.classNameValue === "E") {
-                console.log("Error! There's no class E!");
+                r += Math.ceil(Math.log2(this.state.numberOfHostsNeeded));
+                console.elog(r);
             }
+        } else {
+
         }
-        console.log("1");
+
         randomAddress = r.toString();
         console.log(map);
         if (!(randomAddress in map)) map[randomAddress] = "yes";
         else console.log("Address already existed!");
-        console.log("2");
+        
         localStorage.setItem("addresses", JSON.stringify(map));
         console.log(r.toString(2));
         // localStorage.clear();
+    }
+
+    handleNumberOfHostsChange(event) {
+        this.setState({numberOfHostsNeeded: event.target.value});
     }
 
     getIPv4TabContent() {
@@ -108,7 +116,7 @@ export default class UserInput extends React.Component {
                         </div>
                     <div className="input-group">
                         <span className="input-group-addon" id="basic-addon1">Number of hosts needed:</span>
-                        <input type="number" className="form-control" placeholder="hosts.." aria-describedby="basic-addon1" disabled={this.state.classNameful}/>
+                        <input type="number" className="form-control" placeholder="hosts.." aria-describedby="basic-addon1" disabled={this.state.classNameful} onChange={e=>{this.handleNumberOfHostsChange(e)}}/>
                     </div>
                     <br/>
                     <button type="submit" value="submit" className="btn btn-primary">Assign!</button>
