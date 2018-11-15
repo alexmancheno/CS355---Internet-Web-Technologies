@@ -1,5 +1,6 @@
 import React from 'react';
 import autoBind from 'react-autobind';
+import style from './style.css';
 
 export default class UserInput extends React.Component {
     constructor(props) {
@@ -14,9 +15,11 @@ export default class UserInput extends React.Component {
             numberOfNetworksNeeded: 0,
             generatedIPAddress: "",
             ipAddressInBinary: "",
+            IPv6AddressInColonHex: "",
+            IPv6AddressInBinary: "",
             addresses: JSON.stringify(addresses)
         }
-        localStorage.clear();
+        // localStorage.clear();
     }
 
     handleclassNameChange(event) {
@@ -63,24 +66,28 @@ export default class UserInput extends React.Component {
         let randomAddress;
         let binaryString;
         let r = 0;
+        let subnetMask = 0;
         do {
             if (this.state.classful) {
                 if (this.state.classNameValue === "A") {
-                    r = (this.getRandomInt(128)) << 24;
+                    subnetMask = 24;
+                    r = (this.getRandomInt(128)) << subnetMask;
                     binaryString = r.toString(2);
                     while (binaryString.length < 31)
                         binaryString = "0" + binaryString;
                     binaryString = "0" + binaryString;
                     
                 } else if (this.state.classNameValue === "B") {
-                    r = (this.getRandomInt(16384)) << 16;
+                    subnetMask = 16;
+                    r = (this.getRandomInt(16384)) << subnetMask;
                     binaryString = r.toString(2);
                     while (binaryString.length < 30)
                         binaryString = "0" + binaryString;
                     binaryString = "10" + binaryString;
                     
                 } else if (this.state.classNameValue === "C") {
-                    r = (this.getRandomInt(2097152)) << 8;
+                    subnetMask = 8;
+                    r = (this.getRandomInt(2097152)) << subnetMask;
                     binaryString = r.toString(2);
                     while (binaryString.length < 29)
                         binaryString = "0" + binaryString;
@@ -94,24 +101,28 @@ export default class UserInput extends React.Component {
                     
                 } else if (this.state.classNameValue === "E") {
                     this.setState({generatedIPAddress: "Cannot assign class E addressses!"});
-                    this.setState({ ipAddressInBinary: "Cannot assign class E addressses!" });
+                    this.setState({ ipAddressInBinary: "Cannot assign class E addressses!"});
                     return;
                 }
             } else {
-                if (this.state.numberOfHostsNeeded === 0) return;
+                let numberOfHostsNeeded = this.state.numberOfHostsNeeded;
+                if (numberOfHostsNeeded === 0 || numberOfHostsNeeded == "") return;
                 let suffixBits = Math.ceil(Math.log2(this.state.numberOfHostsNeeded));
-                r = this.getRandomInt(Math.pow(2, 32 - suffixBits));
+                subnetMask = 32 - suffixBits;
+                r = this.getRandomInt(Math.pow(2, subnetMask));
                 r = r << (suffixBits);
                 binaryString = r.toString(2);
                 if (binaryString[0] === '-') binaryString = binaryString.substr(1);
-                while (binaryString.length < 32)
+                while (binaryString.length < 32) {
                     binaryString = "0" + binaryString;
+                    this.sleep(1000);
+                } 
             }
             
-        } while ((r in map)) ;
+        } while (r in map) ;
+        
         map[r] = true;
-
-        randomAddress = this.intToIPAddressString(r);
+        randomAddress = this.intToIPAddressString(r) + "/" + subnetMask.toString();
         this.setState({generatedIPAddress: randomAddress});
         this.setState({ipAddressInBinary: binaryString});
         
@@ -121,7 +132,6 @@ export default class UserInput extends React.Component {
     generateIPv6Address() {
         let numberOfNetworksNeeded = this.state.numberOfNetworksNeeded;
         let zeroCompression = this.state.zeroCompression;
-        // console.log(`numberOfHostsNeeded: ${numberOfNetworksNeeded}\nzeroCompression: ${zeroCompression}`);
 
         let map;
         if (localStorage.getItem("IPv6Addresses") !== null) {
@@ -137,29 +147,54 @@ export default class UserInput extends React.Component {
         }
 
         let suffixBits = 64 - networkBits;
-
-        let randomNumber = this.getRandomInt(Math.pow(2, suffixBits));
-        for (let i = randomNumber.toString(2).length; i < 64; i++) {
-            randomNumber = randomNumber * 2;
-        }
-
-        let hexString = randomNumber.toString(16);
-        let result = "";
-
-        let count = 0;
-        for (let i = 0; i < hexString.length; ) {
-            if (count === 4) {
-                result += ":";
-                count = 0;
-            } else {
-                let c = hexString.charAt(i);
-                result += c;
-                count++;
-                i++;
+        let randomNumber = 0;
+        let result;
+        do {
+            randomNumber = this.getRandomInt(Math.pow(2, suffixBits));
+            for (let i = randomNumber.toString(2).length; i < 64; i++) {
+                randomNumber = randomNumber * 2;
             }
-        }
-        result += ":0000:0000:0000:0000";
-        console.log(result);
+
+            let hexString = randomNumber.toString(16);
+            result = "";
+
+            let count = 0;
+            for (let i = 0; i < hexString.length; ) {
+                if (count === 4) {
+                    result += ":";
+                    count = 0;
+                } else {
+                    let c = hexString.charAt(i);
+                    result += c;
+                    count++;
+                    i++;
+                }
+            }
+            result += ":0000:0000:0000:0000";
+            
+            let array = result.split(":");
+            let compressed = "::";
+            let foundNonZeroes = false;
+            if (zeroCompression) {
+                for (let i = array.length - 1; i >= 0; i--) {
+                    let s = array[i];
+                    if (s !== "0000" || foundNonZeroes) {
+                        compressed = ":" + parseInt(s, 16).toString(16) + compressed;
+                        foundNonZeroes = true;
+                    }
+                }
+
+                result = compressed.substr(1);
+            }
+
+            result += "/" + (64 - networkBits).toString();
+        } while (result in map) ;
+
+        map[result] = true;
+        localStorage.setItem("IPv6Addresses", JSON.stringify(map));
+
+        this.setState({IPv6AddressInColonHex: result});
+        this.setState({IPv6AddressInBinary: randomNumber.toString(2)});
     }
 
     intToIPAddressString(ip) {
@@ -219,11 +254,11 @@ export default class UserInput extends React.Component {
                 <div>
                     <div className="form-group">
                         <label htmlFor="exampleFormControlInput1">Your IPv4 address in decimal:</label>
-                        <input className="form-control" type="text" name="country" value={this.state.generatedIPAddress} readOnly />
+                        <input className={"form-control " + style.courier} type="text" name="country" value={this.state.generatedIPAddress} readOnly />
                     </div>
                     <div className="form-group">
                         <label htmlFor="exampleFormControlInput1">Your IPv4 address in binary:</label>
-                        <input className="form-control" type="text" name="country" value={this.state.ipAddressInBinary} readOnly />
+                        <input className={"form-control " + style.courier} type="text" name="country" value={this.state.ipAddressInBinary} readOnly />
                     </div>
                 </div>
             </div>
@@ -263,11 +298,11 @@ export default class UserInput extends React.Component {
                 <div>
                     <div className="form-group">
                         <label htmlFor="exampleFormControlInput1">Your IPv6 address in colon hex:</label>
-                        <input className="form-control" type="text" name="country" value={this.state.generatedIPAddress} readOnly />
+                        <input className={"form-control " + style.courier} type="text" name="country" value={this.state.IPv6AddressInColonHex} readOnly />
                     </div>
                     <div className="form-group">
                         <label htmlFor="exampleFormControlInput1">Your IPv6 address in binary:</label>
-                        <input className="form-control" type="text" name="country" value={this.state.ipAddressInBinary} readOnly />
+                        <input className={"form-control " + style.courier} type="text" name="country" value={this.state.IPv6AddressInBinary} readOnly />
                     </div>
                 </div>
             </div>
@@ -285,6 +320,7 @@ export default class UserInput extends React.Component {
                 </ul>
 
                 <div className="tab-content">
+                <br></br>
                     <div id="IPv4Tab" className="tab-pane fade in active">
                         {this.getIPv4TabContent()}
                     </div>
