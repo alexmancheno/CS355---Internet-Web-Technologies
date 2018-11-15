@@ -8,16 +8,31 @@ export default class UserInput extends React.Component {
         let addresses = new Object();
         this.state = {
             classful: true,
+            zeroCompression: false,
             classNameValue: "A",
             numberOfHostsNeeded: 0,
-            generatedIPAddress: "ip...",
+            numberOfNetworksNeeded: 0,
+            generatedIPAddress: "",
+            ipAddressInBinary: "",
             addresses: JSON.stringify(addresses)
         }
         localStorage.clear();
     }
 
     handleclassNameChange(event) {
-        this.setState({classNameValue: event.target.value})
+        this.setState({classNameValue: event.target.value});
+    }
+
+    handleNumberOfNetworksChange(event) {
+        this.setState({numberOfNetworksNeeded: event.target.value });
+    }
+
+    handleNumberOfHostsChange(event) {
+        this.setState({numberOfHostsNeeded: event.target.value });
+    }
+
+    handleZeroCompressionChange(bool) {
+        this.setState({zeroCompression: bool});
     }
 
     handleclassNameRadioButtonChange(bool) {
@@ -29,52 +44,122 @@ export default class UserInput extends React.Component {
         this.generateIPv4Address();
     }
 
+    handleIPv6Submit(event) {
+        event.preventDefault();
+        this.generateIPv6Address();
+    }
+
     getRandomInt(max) {
         return Math.floor(Math.random() * Math.floor(max));
     }
 
     generateIPv4Address() {
-        console.log(this.state.addresses);
         let map;
-        if (localStorage.getItem("addresses") !== null) {
-            map = JSON.parse(localStorage.getItem("addresses"));
+        if (localStorage.getItem("IPv4Addresses") !== null) {
+            map = JSON.parse(localStorage.getItem("IPv4Addresses"));
         } else {
             map = new Object();
         }
         let randomAddress;
+        let binaryString;
         let r = 0;
         do {
             if (this.state.classful) {
-                console.log("classful!");
                 if (this.state.classNameValue === "A") {
-                    r += (this.getRandomInt(128)) << 24;
+                    r = (this.getRandomInt(128)) << 24;
+                    binaryString = r.toString(2);
+                    while (binaryString.length < 31)
+                        binaryString = "0" + binaryString;
+                    binaryString = "0" + binaryString;
+                    
                 } else if (this.state.classNameValue === "B") {
-                    r += (this.getRandomInt(64) + 128) << 24;
-                    r += (this.getRandomInt(256) << 16);
+                    r = (this.getRandomInt(16384)) << 16;
+                    binaryString = r.toString(2);
+                    while (binaryString.length < 30)
+                        binaryString = "0" + binaryString;
+                    binaryString = "10" + binaryString;
+                    
                 } else if (this.state.classNameValue === "C") {
-                    r += (this.getRandomInt(32) + 192) << 24;
-                    r += (this.getRandomInt(256)) << 16;
-                    r += (this.getRandomInt(256)) << 8;
+                    r = (this.getRandomInt(2097152)) << 8;
+                    binaryString = r.toString(2);
+                    while (binaryString.length < 29)
+                        binaryString = "0" + binaryString;
+                    binaryString = "110" + binaryString;
                 } else if (this.state.classNameValue === "D")  {
-                    r += (this.getRandomInt(16) + 224) << 24;
-                    r += (this.getRandomInt(256)) << 16;
-                    r += (this.getRandomInt(256)) << 8;
-                    r += (this.getRandomInt(256));
+                    r = (this.getRandomInt(268435456));
+                    binaryString = r.toString(2);
+                    while (binaryString.length < 28)
+                        binaryString = "0" + binaryString;
+                    binaryString = "1110" + binaryString;
+                    
                 } else if (this.state.classNameValue === "E") {
-                    console.log("Cannot assign class E!");
+                    this.setState({generatedIPAddress: "Cannot assign class E addressses!"});
+                    this.setState({ ipAddressInBinary: "Cannot assign class E addressses!" });
+                    return;
                 }
             } else {
-                let prefixBits = Math.ceil(Math.log2(this.state.numberOfHostsNeeded));
-                r += this.getRandomInt(Math.pow(2, 32 - prefixBits));
-                r = r << (prefixBits);
+                if (this.state.numberOfHostsNeeded === 0) return;
+                let suffixBits = Math.ceil(Math.log2(this.state.numberOfHostsNeeded));
+                r = this.getRandomInt(Math.pow(2, 32 - suffixBits));
+                r = r << (suffixBits);
+                binaryString = r.toString(2);
+                if (binaryString[0] === '-') binaryString = binaryString.substr(1);
+                while (binaryString.length < 32)
+                    binaryString = "0" + binaryString;
             }
-            randomAddress = this.intToIPAddressString(r);
-        } while ((randomAddress in map)) ;
+            
+        } while ((r in map)) ;
+        map[r] = true;
 
+        randomAddress = this.intToIPAddressString(r);
         this.setState({generatedIPAddress: randomAddress});
-        map[randomAddress] = true;
-        localStorage.setItem("addresses", JSON.stringify(map));
-        console.log(map)
+        this.setState({ipAddressInBinary: binaryString});
+        
+        localStorage.setItem("IPv4Addresses", JSON.stringify(map));
+    }
+
+    generateIPv6Address() {
+        let numberOfNetworksNeeded = this.state.numberOfNetworksNeeded;
+        let zeroCompression = this.state.zeroCompression;
+        // console.log(`numberOfHostsNeeded: ${numberOfNetworksNeeded}\nzeroCompression: ${zeroCompression}`);
+
+        let map;
+        if (localStorage.getItem("IPv6Addresses") !== null) {
+            map = JSON.parse(localStorage.getItem("IPv6Addresses"));
+        } else {
+            map = new Object();
+        }
+
+        let networkBits = 16;
+        let n = Math.ceil(Math.log2(numberOfNetworksNeeded)) - 16;
+        if (n > 0) {
+            networkBits += n;
+        }
+
+        let suffixBits = 64 - networkBits;
+
+        let randomNumber = this.getRandomInt(Math.pow(2, suffixBits));
+        for (let i = randomNumber.toString(2).length; i < 64; i++) {
+            randomNumber = randomNumber * 2;
+        }
+
+        let hexString = randomNumber.toString(16);
+        let result = "";
+
+        let count = 0;
+        for (let i = 0; i < hexString.length; ) {
+            if (count === 4) {
+                result += ":";
+                count = 0;
+            } else {
+                let c = hexString.charAt(i);
+                result += c;
+                count++;
+                i++;
+            }
+        }
+        result += ":0000:0000:0000:0000";
+        console.log(result);
     }
 
     intToIPAddressString(ip) {
@@ -88,10 +173,6 @@ export default class UserInput extends React.Component {
 
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    handleNumberOfHostsChange(event) {
-        this.setState({numberOfHostsNeeded: event.target.value});
     }
 
     getIPv4TabContent() {
@@ -109,7 +190,7 @@ export default class UserInput extends React.Component {
                             </label>
                         </div>
                     <div className="form-group">
-                        <label htmlFor="classNameSelect">Pick addressing className</label>
+                            <label htmlFor="classNameSelect">Pick addressing className</label>
                         <select className="form-control" id="classNameSelect" value={this.state.classNameValue} onChange={e => this.handleclassNameChange(e)}  disabled={!this.state.classful}>
                             <option>A</option>
                             <option>B</option>
@@ -134,16 +215,16 @@ export default class UserInput extends React.Component {
                     <button type="submit" value="submit" className="btn btn-primary">Assign!</button>
                     </div>
                 </form>
-            </div>
-        )
-    }
-
-    getIPAddressesDisplay() {
-        return (
-            <div>
-                <div className="form-group">
-                    <label for="exampleFormControlInput1">Your IP address:</label>
-                    <input className="form-control" type="text" name="country" value={this.state.generatedIPAddress} readOnly />
+                <br/>
+                <div>
+                    <div className="form-group">
+                        <label htmlFor="exampleFormControlInput1">Your IPv4 address in decimal:</label>
+                        <input className="form-control" type="text" name="country" value={this.state.generatedIPAddress} readOnly />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="exampleFormControlInput1">Your IPv4 address in binary:</label>
+                        <input className="form-control" type="text" name="country" value={this.state.ipAddressInBinary} readOnly />
+                    </div>
                 </div>
             </div>
         )
@@ -152,7 +233,43 @@ export default class UserInput extends React.Component {
     getIPv6TabContent() {
         return (
             <div>
-                hey
+                <form onSubmit={e => this.handleIPv6Submit(e)}>
+                    <div className="form-group-row">
+                        <legend className="col-form-label">Zero compression?</legend>
+                        <div className="radio">
+                            <label>
+                                <input type="radio"
+                                    checked={this.state.zeroCompression === true}
+                                    onChange={e => this.handleZeroCompressionChange(true)} />
+                                yes
+                            </label>
+                            <br/>
+                            <label>
+                                <input type="radio"
+                                    checked={this.state.zeroCompression === false}
+                                    onChange={e => this.handleZeroCompressionChange(false)} />
+                                no
+                            </label>
+                        </div>
+                        <div className="input-group">
+                            <span className="input-group-addon" id="basic-addon1">Number of networks needed:</span>
+                            <input type="number" className="form-control" placeholder="hosts.." aria-describedby="basic-addon1" onChange={e => { this.handleNumberOfNetworksChange(e) }} />
+                        </div>
+                        <br/>
+                        <button type="submit" value="submit" className="btn btn-primary">Assign!</button>
+                    </div>
+                </form>
+                <br/>
+                <div>
+                    <div className="form-group">
+                        <label htmlFor="exampleFormControlInput1">Your IPv6 address in colon hex:</label>
+                        <input className="form-control" type="text" name="country" value={this.state.generatedIPAddress} readOnly />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="exampleFormControlInput1">Your IPv6 address in binary:</label>
+                        <input className="form-control" type="text" name="country" value={this.state.ipAddressInBinary} readOnly />
+                    </div>
+                </div>
             </div>
         )
     }
@@ -176,7 +293,7 @@ export default class UserInput extends React.Component {
                     </div>
                 </div>
                 <br></br>
-                {this.getIPAddressesDisplay()}
+        
             </div>
         )
     }
